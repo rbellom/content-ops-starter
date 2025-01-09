@@ -3,7 +3,7 @@ type: PageLayout
 title: This is a new page
 sections: []
 slug: empty
-isDraft: false
+isDraft: true
 seo:
   type: Seo
   metaTitle: Landing Page
