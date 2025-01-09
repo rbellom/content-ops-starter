@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Proyecciones Financieras</title>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f0f0f0;
+        }
+        .input-group {
+            margin-bottom: 10px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .input-group input, .input-group select {
+            width: 100px;
+        }
+        .button-group {
+            margin-top: 20px;
+        }
+        #resultados {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Calculadora de Proyecciones Financieras</h1>
+
+<div class="input-group">
+    <label for="patrimonioInicial">Patrimonio Inicial ($):</label>
+    <input type="number" id="patrimonioInicial" value="1593">
+</div>
+
+<div class="input-group">
+    <label for="tasaCrecimiento">Tasa de Crecimiento Anual (%):</label>
+    <input type="number" id="tasaCrecimiento" value="14">
+</div>
+
+<div class="input-group">
+    <label for="gastoInicial">Gasto Inicial Anual ($):</label>
+    <input type="number" id="gastoInicial" value="96">
+</div>
+
+<div class="input-group">
+    <label for="incrementoGasto">Incremento Anual del Gasto (%):</label>
+    <input type="number" id="incrementoGasto" value="3">
+</div>
+
+<div class="input-group">
+    <label for="salarioAnual">Salario Anual ($):</label>
+    <input type="number" id="salarioAnual" value="180">
+</div>
+
+<div class="input-group">
+    <label for="periodoProyeccion">Período de Proyección (años):</label>
+    <input type="number" id="periodoProyeccion" value="20">
+</div>
+
+ <div class="input-group">
+    <label for="frecuenciaCapitalizacion">Frecuencia de Capitalización:</label>
+    <select id="frecuenciaCapitalizacion">
+        <option value="1">Anual</option>
+        <option value="2" selected>Semestral</option>
+        <option value="4">Trimestral</option>
+        <option value="12">Mensual</option>
+    </select>
+</div>
+
+<div class="button-group">
+    <button onclick="calcularProyecciones()">Calcular Proyecciones</button>
+</div>
+
+<div id="resultados">
+    <h2>Resultados</h2>
+    <table id="tablaResultados">
+        <thead>
+            <tr>
+                <th>Año</th>
+                <th>Patrimonio Inicial</th>
+                <th>Intereses Generados</th>
+                <th>Salarios Recibidos</th>
+                <th>Ingresos Totales</th>
+                <th>Gasto Anual</th>
+                <th>Reinversión</th>
+                <th>Patrimonio Final</th>
+                <th>% Reinversión</th>
+                <th>% Gasto</th>
+                <th>Crecimiento Anual Patrimonio</th>
+                 <th>Variación Anual Gasto</th>
+                 <th>Variación Anual Reinversión</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Los resultados se insertarán aquí -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+function calcularProyecciones() {
+    const patrimonioInicial = parseFloat(document.getElementById("patrimonioInicial").value);
+    const tasaCrecimiento = parseFloat(document.getElementById("tasaCrecimiento").value) / 100;
+    const gastoInicial = parseFloat(document.getElementById("gastoInicial").value);
+    const incrementoGasto = parseFloat(document.getElementById("incrementoGasto").value) / 100;
+    const salarioAnual = parseFloat(document.getElementById("salarioAnual").value);
+    const periodoProyeccion = parseInt(document.getElementById("periodoProyeccion").value);
+    const frecuenciaCapitalizacion = parseInt(document.getElementById("frecuenciaCapitalizacion").value); // Obtener la frecuencia seleccionada por el usuario
+
+    const tablaResultados = document.getElementById("tablaResultados").getElementsByTagName("tbody")[0];
+    tablaResultados.innerHTML = "";
+
+    let patrimonioActual = patrimonioInicial;
+    let gastoAnual = gastoInicial;
+    let reinversionAnterior = 0;
+
+    for (let año = 0; año <= periodoProyeccion; año++) {
+        let interesesGenerados = 0;
+        let salariosRecibidos = 0;
+        let ingresosTotales = 0;
+        let reinversion = 0;
+        let patrimonioFinal = 0;
+        let porcentajeReinversion = 0;
+        let porcentajeGasto = 0;
+        let crecimientoAnualPatrimonio = 0;
+         let variacionAnualGasto = 0;
+        let variacionAnualReinversion = 0;
+
+
+        if (año > 0) {
+            let patrimonioTemporal = patrimonioActual;
+            let interesesAnuales = 0;
+            let salariosAnuales = 0;
+            let gastosAnuales = 0;
+
+            //Calcular intereses anuales con capitalización.
+            for(let periodo = 0; periodo < frecuenciaCapitalizacion; periodo++){
+                let interesesPeriodo = patrimonioTemporal * (tasaCrecimiento/frecuenciaCapitalizacion);
+                let salarioPeriodo = salarioAnual/frecuenciaCapitalizacion;
+                 let gastoPeriodo = gastoAnual/frecuenciaCapitalizacion;
+                let reinversionPeriodo = interesesPeriodo + salarioPeriodo - gastoPeriodo;
+
+                patrimonioTemporal += reinversionPeriodo;
+                interesesAnuales += interesesPeriodo;
+                salariosAnuales += salarioPeriodo;
+                gastosAnuales += gastoPeriodo;
+
+            }
+
+            interesesGenerados = interesesAnuales;
+            salariosRecibidos = salarioAnual;
+            ingresosTotales = interesesGenerados + salariosRecibidos;
+            reinversion = ingresosTotales - gastoAnual;
+            patrimonioFinal = patrimonioTemporal;
+            porcentajeReinversion = (reinversion / ingresosTotales) * 100;
+            porcentajeGasto = (gastoAnual / ingresosTotales) * 100;
+            crecimientoAnualPatrimonio = ((patrimonioFinal - patrimonioActual) / patrimonioActual) * 100;
+             variacionAnualGasto = año > 1 ? ((gastoAnual - gastoAnualAnterior) / gastoAnualAnterior) * 100 : 0;
+            variacionAnualReinversion = año > 1 ? ((reinversion - reinversionAnterior) / reinversionAnterior) * 100 : 0;
+
+
+        } else {
+             patrimonioFinal = patrimonioInicial;
+        }
+
+        const row = tablaResultados.insertRow();
+        row.insertCell().textContent = año;
+        row.insertCell().textContent = (año === 0 ? patrimonioInicial : patrimonioActual).toFixed(0);
+        row.insertCell().textContent = año > 0 ? interesesGenerados.toFixed(0) : "-";
+        row.insertCell().textContent = año > 0 ? salariosRecibidos.toFixed(0) : "-";
+        row.insertCell().textContent = año > 0 ? ingresosTotales.toFixed(0) : "-";
+        row.insertCell().textContent = año > 0 ? gastoAnual.toFixed(0) : "-";
+        row.insertCell().textContent = año > 0 ? reinversion.toFixed(0) : "-";
+        row.insertCell().textContent = patrimonioFinal.toFixed(0);
+        row.insertCell().textContent = año > 0 ? porcentajeReinversion.toFixed(0) + "%" : "-";
+        row.insertCell().textContent = año > 0 ? porcentajeGasto.toFixed(0) + "%" : "-";
+        row.insertCell().textContent = año > 0 ? crecimientoAnualPatrimonio.toFixed(0) + "%" : "-";
+        row.insertCell().textContent = año > 0 ? variacionAnualGasto.toFixed(0) + "%" : "-";
+        row.insertCell().textContent = año > 0 ? variacionAnualReinversion.toFixed(0) + "%" : "-";
+
+        patrimonioActual = patrimonioFinal;
+         if (año > 0) {
+           gastoAnualAnterior = gastoAnual;
+           gastoAnual *= (1 + incrementoGasto);
+           reinversionAnterior = reinversion;
+        }
+    }
+}
+</script>
+
+</body>
+</html>
